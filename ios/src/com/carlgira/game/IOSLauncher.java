@@ -18,6 +18,7 @@ import org.robovm.apple.corebluetooth.CBUUID;
 import org.robovm.apple.foundation.NSArray;
 import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.foundation.NSError;
+import org.robovm.apple.foundation.NSMutableArray;
 import org.robovm.apple.foundation.NSNumber;
 import org.robovm.apple.foundation.NSObject;
 import org.robovm.apple.foundation.NSString;
@@ -41,7 +42,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     CBCharacteristic characteristic;
     List<CBPeripheral> peripherals;
     NSArray<CBUUID> serviceUUIDs;
-    NSTimer timer;
     private BleManager bleManager;
     CBPeripheral blePeripheral;
 
@@ -50,11 +50,11 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
         IOSApplicationConfiguration config = new IOSApplicationConfiguration();
 
-        timer = new NSTimer();
-        serviceUUIDs = new NSArray<>();
+        serviceUUIDs = new NSMutableArray<>();
         serviceUUIDs.add(new CBUUID("00001816-0000-1000-8000-00805F9B34FB"));
         centralManager = new CBCentralManager(this, null);
         bleManager = new BleManager();
+        bleManager.setIOSApp(this);
 
         return new IOSApplication(new BLECadenceTest(bleManager), config);
     }
@@ -81,7 +81,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     public void starScan(){
         peripherals = new ArrayList<>();
         Foundation.log("Now Scanning...");
-        this.timer.invalidate();
         CBCentralManagerScanOptions options = new CBCentralManagerScanOptions();
         options.setAllowsDuplicates(false);
 
