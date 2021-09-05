@@ -8,6 +8,10 @@ public class ConnectException<T> extends BleException {
     private T bluetoothGatt;
     private int gattStatus;
 
+    public ConnectException(String value) {
+        super(ERROR_CODE_GATT, value);
+    }
+
     public ConnectException(T bluetoothGatt, int gattStatus) {
         super(ERROR_CODE_GATT, "Gatt Exception Occurred! ");
         this.bluetoothGatt = bluetoothGatt;

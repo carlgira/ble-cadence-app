@@ -3,7 +3,6 @@ package com.carlgira.game;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothGatt;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,12 +19,7 @@ import androidx.core.content.ContextCompat;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import com.carlgira.game.adapter.DeviceAdapter;
-import com.carlgira.game.comm.ObserverManager;
-import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleScanCallback;
-import com.clj.fastble.data.IBleDevice;
-import com.clj.fastble.exception.BleException;
 import com.clj.fastble.scan.BleScanRuleConfig;
 
 import java.util.ArrayList;
@@ -35,7 +29,6 @@ import java.util.UUID;
 public class AndroidLauncher extends AndroidApplication {
 
 	private BleManager bleManager;
-	public DeviceAdapter mDeviceAdapter;
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
@@ -44,29 +37,6 @@ public class AndroidLauncher extends AndroidApplication {
 		bleManager = new BleManager();
 		bleManager.init(getApplication());
 		bleManager.setAndroidApp(this);
-
-		mDeviceAdapter = new DeviceAdapter(this);
-		mDeviceAdapter.setOnDeviceClickListener(new DeviceAdapter.OnDeviceClickListener() {
-			@Override
-			public void onConnect(IBleDevice bleDevice) {
-				if (!com.clj.fastble.BleManager.getInstance().isConnected(bleDevice)) {
-					com.clj.fastble.BleManager.getInstance().cancelScan();
-					connect(bleDevice);
-				}
-			}
-
-			@Override
-			public void onDisConnect(final IBleDevice bleDevice) {
-				if (com.clj.fastble.BleManager.getInstance().isConnected(bleDevice)) {
-					com.clj.fastble.BleManager.getInstance().disconnect(bleDevice);
-				}
-			}
-
-			@Override
-			public void onDetail(IBleDevice bleDevice) {
-
-			}
-		});
 
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 
@@ -101,12 +71,12 @@ public class AndroidLauncher extends AndroidApplication {
 	private static final int REQUEST_CODE_OPEN_GPS = 1;
 	private static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
 
-	private BleScanCallback callback;
+	private BleScanCallback scanCallback;
 	private String serviceUUID;
 
 
 	public void checkPermissions(String uuid, BleScanCallback callback) {
-		this.callback = callback;
+		this.scanCallback = callback;
 		this.serviceUUID = uuid;
 		BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (!bluetoothAdapter.isEnabled()) {
@@ -161,7 +131,7 @@ public class AndroidLauncher extends AndroidApplication {
 							.show();
 				} else {
 					setScanRule(this.serviceUUID);
-					callback.onScanStarted(true);
+					scanCallback.onScanStarted(true);
 					startScan();
 				}
 				break;
@@ -182,8 +152,6 @@ public class AndroidLauncher extends AndroidApplication {
 
 		BleScanRuleConfig scanRuleConfig = new BleScanRuleConfig.Builder()
 				.setServiceUuids(serviceUuids)
-				//.setDeviceName(true, names)
-				//.setDeviceMac(mac)
 				.setAutoConnect(isAutoConnect)
 				.setScanTimeOut(10000)
 				.build();
@@ -191,63 +159,7 @@ public class AndroidLauncher extends AndroidApplication {
 	}
 
 	private void startScan() {
-		com.clj.fastble.BleManager.getInstance().scan(new BleScanCallback() {
-			@Override
-			public void onScanStarted(boolean success) {
-				mDeviceAdapter.clearScanDevice();
-				mDeviceAdapter.notifyDataSetChanged();
-			}
-
-			@Override
-			public void onLeScan(IBleDevice bleDevice) {
-				super.onLeScan(bleDevice);
-			}
-
-			@Override
-			public void onScanning(IBleDevice bleDevice) {
-				mDeviceAdapter.addDevice(bleDevice);
-				mDeviceAdapter.notifyDataSetChanged();
-				callback.onScanning(bleDevice);
-			}
-
-			@Override
-			public void onScanFinished(List<IBleDevice> scanResultList) {
-				callback.onScanFinished(scanResultList);
-			}
-		});
+		com.clj.fastble.BleManager.getInstance().scan(scanCallback);
 	}
 
-	private void connect(final IBleDevice bleDevice) {
-		com.clj.fastble.BleManager.getInstance().connect(bleDevice, new BleGattCallback<BluetoothGatt>() {
-			@Override
-			public void onStartConnect() {
-
-
-			}
-
-			@Override
-			public void onConnectFail(IBleDevice bleDevice, BleException exception) {
-
-			}
-
-			@Override
-			public void onConnectSuccess(IBleDevice bleDevice, BluetoothGatt gatt, int status) {
-				mDeviceAdapter.addDevice(bleDevice);
-				mDeviceAdapter.notifyDataSetChanged();
-			}
-
-			@Override
-			public void onDisConnected(boolean isActiveDisConnected, IBleDevice bleDevice, BluetoothGatt gatt, int status) {
-				mDeviceAdapter.removeDevice(bleDevice);
-				mDeviceAdapter.notifyDataSetChanged();
-
-				if (isActiveDisConnected) {
-
-				} else {
-					ObserverManager.getInstance().notifyObserver(bleDevice);
-				}
-
-			}
-		});
-	}
 }

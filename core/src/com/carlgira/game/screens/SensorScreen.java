@@ -10,9 +10,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.Align;
 import com.carlgira.game.base.BaseScreen;
+import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.IBleDevice;
 import com.clj.fastble.data.IBleManager;
+import com.clj.fastble.exception.BleException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +58,7 @@ public class SensorScreen extends BaseScreen {
 
                 @Override
                 public void onScanning(IBleDevice bleDevice) {
+                    setMsgLabel("New Device : "  + bleDevice.getName());
                     newDeviceDiscovered(bleDevice);
                 }
 
@@ -93,6 +96,7 @@ public class SensorScreen extends BaseScreen {
     public void newDeviceDiscovered(IBleDevice device){
         if(!listDevices.containsKey(device.getName())){
             CheckBox d = new CheckBox(device.getName(), skin);
+            d.setName(device.getName());
             d.addListener(e -> {
 
                 if ( !(e instanceof InputEvent) ||  !((InputEvent)e).getType().equals(InputEvent.Type.touchDown) ){
@@ -100,20 +104,64 @@ public class SensorScreen extends BaseScreen {
                 }
 
                 String checkedDevice = e.getListenerActor().getName();
+                Gdx.app.log("BLEAPP", "checkedDevice " + checkedDevice);
+
                 IBleDevice cd = listDevices.get(checkedDevice);
 
                 String connectedDevice = "";
                 for(String key : listDevices.keySet()){
+                    Gdx.app.log("BLEAPP", "key " + key);
                     if(checkBoxes.get(key).isChecked()){
                         checkBoxes.get(key).setChecked(false);
                         connectedDevice = key;
-                        // FIX disconnect
+                        bleManager.disconnect(listDevices.get(key), new BleGattCallback() {
+                            @Override
+                            public void onStartConnect() {
+
+                            }
+
+                            @Override
+                            public void onConnectFail(IBleDevice bleDevice, BleException exception) {
+
+                            }
+
+                            @Override
+                            public void onConnectSuccess(IBleDevice bleDevice, Object gatt, int status) {
+
+                            }
+
+                            @Override
+                            public void onDisConnected(boolean isActiveDisConnected, IBleDevice device, Object gatt, int status) {
+                                setMsgLabel("DisConnected from device : " + device.getName());
+                            }
+                        });
                         break;
                     }
                 }
 
                 if(!connectedDevice.equals(checkedDevice)){
-                    // FIX connect
+                    bleManager.connect(cd, new BleGattCallback() {
+                        @Override
+                        public void onStartConnect() {
+                            setMsgLabel("Starting to connect to device ");
+                        }
+
+                        @Override
+                        public void onConnectFail(IBleDevice bleDevice, BleException exception) {
+                            setMsgLabel("Fail connect to device  " );
+                            Gdx.app.log("BLEAPP", exception.getDescription());
+                        }
+
+                        @Override
+                        public void onConnectSuccess(IBleDevice bleDevice, Object gatt, int status) {
+                            setMsgLabel("Connected to device : " + bleDevice.getName());
+                        }
+
+                        @Override
+                        public void onDisConnected(boolean isActiveDisConnected, IBleDevice device, Object gatt, int status) {
+
+                        }
+                    });
                 }
 
                 return true;

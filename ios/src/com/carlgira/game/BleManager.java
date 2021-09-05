@@ -5,6 +5,8 @@ import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.IBleDevice;
 import com.clj.fastble.data.IBleManager;
 
+import org.robovm.apple.corebluetooth.CBPeripheral;
+
 public class BleManager implements IBleManager {
 
     private IOSLauncher launcher;
@@ -17,7 +19,7 @@ public class BleManager implements IBleManager {
 
     @Override
     public void connect(IBleDevice device, BleGattCallback callback) {
-
+        this.launcher.connectToDevice((CBPeripheral)device.getDevice(), callback);
     }
 
     @Override

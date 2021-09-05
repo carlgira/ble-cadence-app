@@ -25,9 +25,13 @@ import org.robovm.apple.foundation.Foundation;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;
 import com.badlogic.gdx.utils.Timer;
+import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleScanCallback;
+import com.clj.fastble.data.IBleDevice;
+import com.clj.fastble.exception.ConnectException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -39,6 +43,8 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     NSArray<CBUUID> serviceUUIDs;
     private BleManager bleManager;
     CBPeripheral blePeripheral;
+
+    HashMap<String, IBleDevice> devices = new HashMap<>();
 
     @Override
     protected IOSApplication createApplication() {
@@ -105,8 +111,11 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         }
     }
 
-    public void connectToDevice () {
-        centralManager.connectPeripheral(blePeripheral, null);
+    private BleGattCallback connectCallback;
+
+    public void connectToDevice (CBPeripheral peripheral, BleGattCallback callback) {
+        connectCallback = callback;
+        centralManager.connectPeripheral(peripheral, null);
     }
 
     int prevCumCrankRev = 0;
@@ -142,6 +151,8 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     public void didDiscoverPeripheral(CBCentralManager central, CBPeripheral peripheral, CBAdvertisementData advertisementData, NSNumber rssi) {
         blePeripheral = peripheral;
         this.peripherals.add(peripheral);
+        BleDevice device = new BleDevice(peripheral);
+        devices.put(device.getName(), device);
         peripheral.setDelegate(this);
         this.callback.onScanning(new BleDevice(peripheral));
         if (blePeripheral != null) {
@@ -155,17 +166,18 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
     @Override
     public void didConnectPeripheral(CBCentralManager central, CBPeripheral peripheral) {
-
+        blePeripheral = peripheral;
+        connectCallback.onConnectSuccess(devices.get(peripheral.getName()), peripheral, 0);
     }
 
     @Override
     public void didFailToConnectPeripheral(CBCentralManager central, CBPeripheral peripheral, NSError error) {
-
+        connectCallback.onConnectFail(devices.get(peripheral.getName()), new ConnectException<>(error.getLocalizedDescription()));
     }
 
     @Override
     public void didDisconnectPeripheral(CBCentralManager central, CBPeripheral peripheral, NSError error) {
-
+        connectCallback.onDisConnected(true, devices.get(peripheral.getName()), peripheral, 0);
     }
 
     @Override

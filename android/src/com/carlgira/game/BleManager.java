@@ -1,11 +1,14 @@
 package com.carlgira.game;
 
 import android.app.Application;
+import android.bluetooth.BluetoothGatt;
 
+import com.carlgira.game.comm.ObserverManager;
 import com.clj.fastble.callback.BleGattCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.IBleDevice;
 import com.clj.fastble.data.IBleManager;
+import com.clj.fastble.exception.BleException;
 
 public class BleManager implements IBleManager {
 
@@ -23,7 +26,7 @@ public class BleManager implements IBleManager {
 
     @Override
     public void connect(IBleDevice device, BleGattCallback callback) {
-
+        com.clj.fastble.BleManager.getInstance().connect(device, callback);
     }
 
 
