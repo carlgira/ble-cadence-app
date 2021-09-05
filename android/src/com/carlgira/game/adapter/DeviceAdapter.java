@@ -8,7 +8,7 @@ import android.widget.BaseAdapter;
 
 
 import com.clj.fastble.BleManager;
-import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.data.IBleDevice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,21 +16,21 @@ import java.util.List;
 public class DeviceAdapter extends BaseAdapter {
 
     private final Context context;
-    private final List<BleDevice> bleDeviceList;
+    private final List<IBleDevice> bleDeviceList;
 
     public DeviceAdapter(Context context) {
         this.context = context;
         bleDeviceList = new ArrayList<>();
     }
 
-    public void addDevice(BleDevice bleDevice) {
+    public void addDevice(IBleDevice bleDevice) {
         removeDevice(bleDevice);
         bleDeviceList.add(bleDevice);
     }
 
-    public void removeDevice(BleDevice bleDevice) {
+    public void removeDevice(IBleDevice bleDevice) {
         for (int i = 0; i < bleDeviceList.size(); i++) {
-            BleDevice device = bleDeviceList.get(i);
+            IBleDevice device = bleDeviceList.get(i);
             if (bleDevice.getKey().equals(device.getKey())) {
                 bleDeviceList.remove(i);
             }
@@ -39,7 +39,7 @@ public class DeviceAdapter extends BaseAdapter {
 
     public void clearConnectedDevice() {
         for (int i = 0; i < bleDeviceList.size(); i++) {
-            BleDevice device = bleDeviceList.get(i);
+            IBleDevice device = bleDeviceList.get(i);
             if (BleManager.getInstance().isConnected(device)) {
                 bleDeviceList.remove(i);
             }
@@ -48,7 +48,7 @@ public class DeviceAdapter extends BaseAdapter {
 
     public void clearScanDevice() {
         for (int i = 0; i < bleDeviceList.size(); i++) {
-            BleDevice device = bleDeviceList.get(i);
+            IBleDevice device = bleDeviceList.get(i);
             if (!BleManager.getInstance().isConnected(device)) {
                 bleDeviceList.remove(i);
             }
@@ -66,7 +66,7 @@ public class DeviceAdapter extends BaseAdapter {
     }
 
     @Override
-    public BleDevice getItem(int position) {
+    public IBleDevice getItem(int position) {
         if (position > bleDeviceList.size())
             return null;
         return bleDeviceList.get(position);
@@ -83,11 +83,11 @@ public class DeviceAdapter extends BaseAdapter {
     }
 
     public interface OnDeviceClickListener {
-        void onConnect(BleDevice bleDevice);
+        void onConnect(IBleDevice bleDevice);
 
-        void onDisConnect(BleDevice bleDevice);
+        void onDisConnect(IBleDevice bleDevice);
 
-        void onDetail(BleDevice bleDevice);
+        void onDetail(IBleDevice bleDevice);
     }
 
     private OnDeviceClickListener mListener;

@@ -83,3 +83,11 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 # lint/reports/
+
+
+# IDE
+.idea
+
+# IOS
+ios/robovm-build/
+

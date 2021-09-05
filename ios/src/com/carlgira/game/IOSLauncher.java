@@ -3,7 +3,6 @@ package com.carlgira.game;
 import org.robovm.apple.corebluetooth.CBAdvertisementData;
 import org.robovm.apple.corebluetooth.CBCentralManager;
 import org.robovm.apple.corebluetooth.CBCentralManagerDelegate;
-import org.robovm.apple.corebluetooth.CBCentralManagerOptions;
 import org.robovm.apple.corebluetooth.CBCentralManagerRestoredState;
 import org.robovm.apple.corebluetooth.CBCentralManagerScanOptions;
 import org.robovm.apple.corebluetooth.CBCharacteristic;
@@ -20,17 +19,13 @@ import org.robovm.apple.foundation.NSAutoreleasePool;
 import org.robovm.apple.foundation.NSError;
 import org.robovm.apple.foundation.NSMutableArray;
 import org.robovm.apple.foundation.NSNumber;
-import org.robovm.apple.foundation.NSObject;
-import org.robovm.apple.foundation.NSString;
-import org.robovm.apple.foundation.NSTimer;
 import org.robovm.apple.uikit.UIApplication;
 import org.robovm.apple.foundation.Foundation;
-import org.robovm.apple.uikit.UIApplicationLaunchOptions;
 
 import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;
 import com.badlogic.gdx.utils.Timer;
-import com.carlgira.game.base.Callback;
+import com.clj.fastble.callback.BleScanCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,10 +46,10 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         IOSApplicationConfiguration config = new IOSApplicationConfiguration();
 
         serviceUUIDs = new NSMutableArray<>();
-        serviceUUIDs.add(new CBUUID("00001816-0000-1000-8000-00805F9B34FB"));
         centralManager = new CBCentralManager(this, null);
         bleManager = new BleManager();
         bleManager.setIOSApp(this);
+        config.orientationPortrait = true;
 
         return new IOSApplication(new BLECadenceTest(bleManager), config);
     }
@@ -72,9 +67,12 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         pool.close();
     }
 
-    private Callback<BleDevice> callback;
-    public void checkPermissions(Callback callback){
+    private BleScanCallback callback;
+    public void checkPermissions(String uuid, BleScanCallback callback){
         this.callback = callback;
+        serviceUUIDs.clear();
+        serviceUUIDs.add(new CBUUID(uuid));
+        this.callback.onScanStarted(true);
         this.starScan();
     }
 
@@ -105,7 +103,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         if(blePeripheral != null){
             centralManager.cancelPeripheralConnection(blePeripheral);
         }
-
     }
 
     public void connectToDevice () {
@@ -146,7 +143,7 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         blePeripheral = peripheral;
         this.peripherals.add(peripheral);
         peripheral.setDelegate(this);
-        this.callback.call(new BleDevice(peripheral));
+        this.callback.onScanning(new BleDevice(peripheral));
         if (blePeripheral != null) {
             Foundation.log("Found new pheripheral devices with services");
             Foundation.log("Peripheral name: " + peripheral.getName());

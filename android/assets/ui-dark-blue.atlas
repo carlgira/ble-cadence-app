@@ -1,0 +1,160 @@
+
+ui-dark-blue.png
+size: 2048, 2048
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+background_neutral
+  rotate: false
+  xy: 2, 1274
+  size: 1366, 768
+  orig: 1366, 768
+  offset: 0, 0
+  index: -1
+background_race
+  rotate: false
+  xy: 2, 504
+  size: 1366, 768
+  orig: 1366, 768
+  offset: 0, 0
+  index: -1
+button_big
+  rotate: false
+  xy: 670, 442
+  size: 230, 60
+  orig: 230, 60
+  offset: 0, 0
+  index: -1
+button_small
+  rotate: false
+  xy: 1634, 1419
+  size: 135, 35
+  orig: 135, 35
+  offset: 0, 0
+  index: -1
+checkbox
+  rotate: false
+  xy: 1799, 1602
+  size: 38, 30
+  orig: 38, 30
+  offset: 0, 0
+  index: -1
+checkbox_select
+  rotate: false
+  xy: 392, 183
+  size: 44, 39
+  orig: 44, 39
+  offset: 0, 0
+  index: -1
+flag
+  rotate: false
+  xy: 1841, 1891
+  size: 205, 151
+  orig: 205, 151
+  offset: 0, 0
+  index: -1
+flag
+  rotate: false
+  xy: 453, 227
+  size: 215, 275
+  orig: 215, 275
+  offset: 0, 0
+  index: 2
+icon_avatar
+  rotate: false
+  xy: 1841, 1687
+  size: 68, 100
+  orig: 68, 100
+  offset: 0, 0
+  index: -1
+icon_folder
+  rotate: false
+  xy: 2, 2
+  size: 99, 100
+  orig: 99, 100
+  offset: 0, 0
+  index: -1
+icon_frame
+  rotate: false
+  xy: 1370, 1291
+  size: 118, 118
+  orig: 118, 118
+  offset: 0, 0
+  index: -1
+icon_helmet
+  rotate: false
+  xy: 670, 340
+  size: 85, 100
+  orig: 85, 100
+  offset: 0, 0
+  index: -1
+icon_setup
+  rotate: false
+  xy: 1841, 1789
+  size: 145, 100
+  orig: 145, 100
+  offset: 0, 0
+  index: -1
+information_point
+  rotate: false
+  xy: 1988, 1874
+  size: 14, 15
+  orig: 14, 15
+  offset: 0, 0
+  index: -1
+input_field
+  rotate: false
+  xy: 1370, 1411
+  size: 262, 43
+  orig: 262, 43
+  offset: 0, 0
+  index: -1
+slide_bar
+  rotate: false
+  xy: 2, 104
+  size: 300, 2
+  orig: 300, 2
+  offset: 0, 0
+  index: -1
+slider_point
+  rotate: false
+  xy: 1370, 1279
+  size: 10, 10
+  orig: 10, 10
+  offset: 0, 0
+  index: -1
+slider_select
+  rotate: false
+  xy: 902, 482
+  size: 20, 20
+  orig: 20, 20
+  offset: 0, 0
+  index: -1
+window_big
+  rotate: false
+  xy: 1370, 1634
+  size: 469, 408
+  orig: 469, 408
+  offset: 0, 0
+  index: -1
+window_header
+  rotate: false
+  xy: 2, 108
+  size: 388, 114
+  orig: 388, 114
+  offset: 0, 0
+  index: -1
+window_medium
+  rotate: false
+  xy: 2, 224
+  size: 449, 278
+  orig: 449, 278
+  offset: 0, 0
+  index: -1
+window_small
+  rotate: false
+  xy: 1370, 1456
+  size: 427, 176
+  orig: 427, 176
+  offset: 0, 0
+  index: -1

@@ -2,48 +2,67 @@ package com.carlgira.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.carlgira.game.base.BaseGame;
+import com.badlogic.gdx.utils.Align;
 import com.carlgira.game.base.BaseScreen;
-import com.carlgira.game.base.Callback;
-import com.carlgira.game.ble.IBleDevice;
-import com.carlgira.game.ble.IBleManager;
+import com.clj.fastble.callback.BleScanCallback;
+import com.clj.fastble.data.IBleDevice;
+import com.clj.fastble.data.IBleManager;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class SensorScreen extends BaseScreen {
-    private Table uiTable;
+    private Table table;
+    private final HashMap<String, IBleDevice> listDevices = new HashMap<>();
+    private final HashMap<String,CheckBox> checkBoxes = new HashMap<>();
+    private TextButton scanButton;
+    private IBleManager bleManager;
+    private Label msgLabel;
 
     public SensorScreen(IBleManager bleManager){
         this.bleManager = bleManager;
     }
 
-    private IBleManager bleManager;
-
     public void initialize() {
-        TextButton scanButton = new TextButton( "Scan", BaseGame.textButtonStyle);
-
-        scanButton.setPosition(150,150);
-        stage.addActor(scanButton);
+        super.initialize();
+        scanButton = new TextButton( "SCAN", skin);
+        scanButton.align( Align.center);
+        scanButton.setPosition(width/2.0f - scanButton.getWidth()/2, height*0.075f);
 
         scanButton.addListener(e -> {
-            bleManager.checkPermissions(new Callback() {
+            Gdx.app.log("BLEAPP", "b "  +e.getClass());
+            if (!(e instanceof InputEvent))
+                return false;
+
+            if (!((InputEvent) e).getType().equals(InputEvent.Type.touchDown))
+                return false;
+
+            Gdx.app.log("BLEAPP", "a "  +e.getClass());
+
+            scanButton.setTouchable(Touchable.disabled);
+            listDevices.clear();
+            checkBoxes.clear();
+            bleManager.scan("00001816-0000-1000-8000-00805F9B34FB", new BleScanCallback() {
                 @Override
-                public void call(List devices) {
-                    for(int i=0;i<devices.size();i++){
-                        IBleDevice device = (IBleDevice)devices.get(0);
-                        TextButton d = new TextButton( device.getName(), BaseGame.textButtonStyle);
-                        uiTable.add(d);
-                        uiTable.row();
-                    }
+                public void onScanStarted(boolean success) {
+                    setMsgLabel("Scan Started");
                 }
 
                 @Override
-                public void call(IBleDevice device) {
-                    TextButton d = new TextButton( device.getName(), BaseGame.textButtonStyle);
-                    uiTable.add(d);
-                    uiTable.row();
+                public void onScanning(IBleDevice bleDevice) {
+                    newDeviceDiscovered(bleDevice);
+                }
+
+                @Override
+                public void onScanFinished(List<IBleDevice> scanResultList) {
+                    setMsgLabel("Scan Finished");
+                    scanButton.setTouchable(Touchable.enabled);
                 }
             });
 
@@ -51,14 +70,62 @@ public class SensorScreen extends BaseScreen {
             }
         );
 
-        uiTable = new Table();
-        uiTable.row();
+        msgLabel = new Label("", skin);
+        this.setMsgLabel("Scan for devices");
 
-        uiTable.add(scanButton);
-        uiTable.row();
 
-        uiTable.setFillParent(true);
-        stage.addActor(uiTable);
+        table = new Table();
+        table.setWidth((int)(BaseScreen.width*0.9));
+        table.setHeight((int)(BaseScreen.height*0.7));
+        table.setPosition((int)(BaseScreen.width*0.05), (int)(BaseScreen.height*0.15));
+        table.padTop(50);
+
+        stage.addActor(scanButton);
+        stage.addActor(table);
+        stage.addActor(msgLabel);
+    }
+
+    public void setMsgLabel(String message){
+        msgLabel.setText(message);
+        msgLabel.setPosition(width/2.0f - msgLabel.getWidth()/2, height*0.03f);
+    }
+
+    public void newDeviceDiscovered(IBleDevice device){
+        if(!listDevices.containsKey(device.getName())){
+            CheckBox d = new CheckBox(device.getName(), skin);
+            d.addListener(e -> {
+
+                if ( !(e instanceof InputEvent) ||  !((InputEvent)e).getType().equals(InputEvent.Type.touchDown) ){
+                    return false;
+                }
+
+                String checkedDevice = e.getListenerActor().getName();
+                IBleDevice cd = listDevices.get(checkedDevice);
+
+                String connectedDevice = "";
+                for(String key : listDevices.keySet()){
+                    if(checkBoxes.get(key).isChecked()){
+                        checkBoxes.get(key).setChecked(false);
+                        connectedDevice = key;
+                        // FIX disconnect
+                        break;
+                    }
+                }
+
+                if(!connectedDevice.equals(checkedDevice)){
+                    // FIX connect
+                }
+
+                return true;
+            });
+
+
+            listDevices.put(device.getName(), device);
+            checkBoxes.put(device.getName(), d);
+
+            table.add(d);
+            table.row();
+        }
     }
 
     public void update(float dt) {

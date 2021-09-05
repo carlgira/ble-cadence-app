@@ -2,6 +2,7 @@ package com.carlgira.game.comm;
 
 
 import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.data.IBleDevice;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class ObserverManager implements Observable {
     }
 
     @Override
-    public void notifyObserver(BleDevice bleDevice) {
+    public void notifyObserver(IBleDevice bleDevice) {
         for (int i = 0; i < observers.size(); i++) {
             Observer o = observers.get(i);
             o.disConnected(bleDevice);

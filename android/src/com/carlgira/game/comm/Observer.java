@@ -1,9 +1,9 @@
 package com.carlgira.game.comm;
 
 
-import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.data.IBleDevice;
 
 public interface Observer {
 
-    void disConnected(BleDevice bleDevice);
+    void disConnected(IBleDevice bleDevice);
 }

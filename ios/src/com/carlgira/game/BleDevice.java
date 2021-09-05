@@ -1,6 +1,7 @@
 package com.carlgira.game;
 
-import com.carlgira.game.ble.IBleDevice;
+
+import com.clj.fastble.data.IBleDevice;
 
 import org.robovm.apple.corebluetooth.CBPeripheral;
 

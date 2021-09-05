@@ -1,15 +1,14 @@
 package com.carlgira.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
 import com.carlgira.game.BLECadenceTest;
-import com.carlgira.game.base.BaseGame;
 import com.carlgira.game.base.BaseScreen;
-import com.carlgira.game.ble.IBleManager;
+import com.clj.fastble.data.IBleManager;
 
 
 public class MainScreen extends BaseScreen {
@@ -20,65 +19,63 @@ public class MainScreen extends BaseScreen {
 
     private IBleManager bleManager;
 
-    private Table uiTable;
+    private Table table;
+    private Label cadenceLabel;
+
 
     public void initialize() {
-        TextButton startButton = new TextButton( "Start", BaseGame.textButtonStyle);
+        super.initialize();
 
-        startButton.setPosition(150,150);
-        stage.addActor(startButton);
+        TextButton configButton = new TextButton( "CONFIG", skin);
 
-        startButton.addListener(e -> {
-                    if (!(e instanceof InputEvent))
-                        return false;
 
-                    if (!((InputEvent) e).getType().equals(Type.touchDown))
-                        return false;
+        configButton.addListener(e -> {
+                if (!(e instanceof InputEvent))
+                    return false;
 
-                    BLECadenceTest.setActiveScreen( new SensorScreen(bleManager) );
-                    return true;
-                }
+                if (!((InputEvent) e).getType().equals(Type.touchDown))
+                    return false;
+
+                BLECadenceTest.setActiveScreen( new SensorScreen(bleManager) );
+                return true;
+            }
         );
 
-        TextButton quitButton = new TextButton( "Quit", BaseGame.textButtonStyle );
-        quitButton.setPosition(500,150);
-        stage.addActor(quitButton);
+        float labelScalar = (2.0f / 360f) * width;
 
-        quitButton.addListener(e -> {
-            if (!(e instanceof InputEvent))
-                return false;
+        cadenceLabel = new Label("0.00", skin, "title");
+        skin.getFont("title").getData().setScale(1.5f, 1.5f);
 
-            if (!((InputEvent) e).getType().equals(Type.touchDown))
-                return false;
+        Label unitsLabel = new Label("RPM", skin);
+        skin.getFont("font").getData().setScale(1.5f, 1.5f);
 
-            Gdx.app.exit();
-            return true;
-        });
 
-        uiTable = new Table();
-        uiTable.row();
+        table = new Table();
+        table.setWidth((int)(BaseScreen.width*0.9));
+        table.setHeight((int)(BaseScreen.height*0.9));
+        table.setPosition((int)(BaseScreen.width*0.05), (int)(BaseScreen.height*0.05));
+        table.padTop(100);
 
-        uiTable.add(startButton);
-        uiTable.row();
-        uiTable.add(quitButton);
+        table.row().expandY();
+        table.add(cadenceLabel).colspan(2);
+        table.row();
+        table.add(unitsLabel).colspan(2);
+        table.row().expandY();
+        table.row().expandX();
+        table.add(configButton).bottom().right();
 
-        uiTable.setFillParent(true);
-        stage.addActor(uiTable);
+        table.setSkin(skin);
+        stage.addActor(table);
+
     }
 
     public void update(float dt) {
 
     }
 
-    public boolean keyDown(int keyCode) {
-        if (Gdx.input.isKeyPressed(Keys.ESCAPE)){
-            Gdx.app.exit();
-        }
-        return false;
-    }
-
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
     }
+
 }

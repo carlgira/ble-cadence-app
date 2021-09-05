@@ -2,28 +2,28 @@ package com.carlgira.game;
 
 import android.app.Application;
 
-import com.carlgira.game.base.Callback;
-import com.carlgira.game.ble.IBleManager;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleScanCallback;
+import com.clj.fastble.data.IBleDevice;
+import com.clj.fastble.data.IBleManager;
 
 public class BleManager implements IBleManager {
 
     private AndroidLauncher launcher;
 
     @Override
-    public List<BleDevice> scan(String uuid) {
-        List<BleDevice> devices = new ArrayList<>();
-        for(int i =0;i< launcher.mDeviceAdapter.getCount();i++){
-            devices.add(new BleDevice(launcher.mDeviceAdapter.getItem(i)));
-        }
-        return devices;
+    public void disconnect(IBleDevice device, BleGattCallback callback) {
+
     }
 
     @Override
-    public void checkPermissions(Callback callback) {
-        launcher.checkPermissions(callback);
+    public void scan(String uuid, BleScanCallback callback) {
+        this.launcher.checkPermissions(uuid, callback);
+    }
+
+    @Override
+    public void connect(IBleDevice device, BleGattCallback callback) {
+
     }
 
 

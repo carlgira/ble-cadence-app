@@ -1,23 +1,28 @@
 package com.carlgira.game;
 
-import com.carlgira.game.base.Callback;
-import com.carlgira.game.ble.IBleDevice;
-import com.carlgira.game.ble.IBleManager;
-
-import java.util.List;
+import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleScanCallback;
+import com.clj.fastble.data.IBleDevice;
+import com.clj.fastble.data.IBleManager;
 
 public class BleManager implements IBleManager {
 
     private IOSLauncher launcher;
+
+
     @Override
-    public List<IBleDevice> scan(String uuid) {
-        return null;
+    public void scan(String uuid, BleScanCallback callback) {
+        this.launcher.checkPermissions(uuid, callback);
     }
 
+    @Override
+    public void connect(IBleDevice device, BleGattCallback callback) {
+
+    }
 
     @Override
-    public void checkPermissions(Callback callback) {
-        this.launcher.checkPermissions(callback);
+    public void disconnect(IBleDevice device, BleGattCallback callback) {
+
     }
 
     public void setIOSApp(IOSLauncher launcher){

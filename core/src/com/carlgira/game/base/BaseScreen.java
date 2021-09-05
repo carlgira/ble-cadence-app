@@ -1,23 +1,40 @@
 package com.carlgira.game.base;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+
 
 public abstract class BaseScreen implements Screen, InputProcessor
 {
     protected Stage stage;
+    public static final TextureAtlas textureAtlas  = new TextureAtlas("ui-dark-blue.atlas");
+    protected final static int width = 360;
+    protected final static int height = 720;
+    protected Skin skin = new Skin(Gdx.files.internal("skin/comic-ui.json"));
+
+    private Viewport viewport;
+    private Camera camera;
 
     public BaseScreen() {
-        stage = new Stage();
         initialize();
     }
 
-    public abstract void initialize();
+    public void initialize(){
+        camera = new PerspectiveCamera();
+        viewport = new FitViewport(width, height);
+        stage = new Stage(viewport);
+    }
 
     public abstract void update(float dt);
 
@@ -25,12 +42,15 @@ public abstract class BaseScreen implements Screen, InputProcessor
         stage.act(dt);
         update(dt);
 
-        ScreenUtils.clear(0, 0, 0, 1);
+        ScreenUtils.clear(255, 255, 255, 1);
 
         stage.draw();
     }
 
-    public void resize(int width, int height) {  }
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
 
     public void pause()   {  }
 
@@ -74,5 +94,9 @@ public abstract class BaseScreen implements Screen, InputProcessor
 
     public boolean touchUp(int screenX, int screenY, int pointer, int button)
     {  return false;  }
+
+    public static int scale(int value){
+        return (int)(0.11*value);
+    }
 }
 

@@ -17,3 +17,7 @@ robovm {
 }
 
 eclipse.project.name = appName + "-ios"
+
+dependencies {
+	implementation project(':fast-ble-core')
+}

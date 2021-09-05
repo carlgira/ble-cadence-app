@@ -1,7 +1,6 @@
 package com.carlgira.game.comm;
 
-
-import com.clj.fastble.data.BleDevice;
+import com.clj.fastble.data.IBleDevice;
 
 public interface Observable {
 
@@ -9,5 +8,5 @@ public interface Observable {
 
     void deleteObserver(Observer obj);
 
-    void notifyObserver(BleDevice bleDevice);
+    void notifyObserver(IBleDevice bleDevice);
 }
