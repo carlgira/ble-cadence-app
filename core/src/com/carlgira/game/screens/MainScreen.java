@@ -1,33 +1,35 @@
 package com.carlgira.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
+import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.carlgira.game.BLECadenceTest;
 import com.carlgira.game.base.BaseScreen;
 import com.clj.fastble.data.IBleManager;
 
-
 public class MainScreen extends BaseScreen {
+
+    private IBleManager bleManager;
+    private Table table;
+    private Label cadenceLabel;
+    private int cadence = 0;
 
     public MainScreen(IBleManager bleManager){
         this.bleManager = bleManager;
     }
 
-    private IBleManager bleManager;
-
-    private Table table;
-    private Label cadenceLabel;
-
-
     public void initialize() {
         super.initialize();
+        Gdx.app.log("BLEAPP", "init MainScreen");
 
         TextButton configButton = new TextButton( "CONFIG", skin);
-
 
         configButton.addListener(e -> {
                 if (!(e instanceof InputEvent))
@@ -36,19 +38,17 @@ public class MainScreen extends BaseScreen {
                 if (!((InputEvent) e).getType().equals(Type.touchDown))
                     return false;
 
-                BLECadenceTest.setActiveScreen( new SensorScreen(bleManager) );
+                BLECadenceTest.setActiveScreen( new SensorScreen(MainScreen.this, bleManager));
                 return true;
             }
         );
 
-        float labelScalar = (2.0f / 360f) * width;
+        skin.getFont("title").getData().setScale(2f, 2f);
+        skin.getFont("font").getData().setScale(2f, 2f);
 
-        cadenceLabel = new Label("0.00", skin, "title");
-        skin.getFont("title").getData().setScale(1.5f, 1.5f);
+        cadenceLabel = new Label("0", skin, "title");
 
         Label unitsLabel = new Label("RPM", skin);
-        skin.getFont("font").getData().setScale(1.5f, 1.5f);
-
 
         table = new Table();
         table.setWidth((int)(BaseScreen.width*0.9));
@@ -66,16 +66,21 @@ public class MainScreen extends BaseScreen {
 
         table.setSkin(skin);
         stage.addActor(table);
-
     }
 
+    @Override
     public void update(float dt) {
 
     }
+
+    public void setCadence(int cadence){
+        this.cadence = cadence;
+        this.cadenceLabel.setText("" + this.cadence);
+    }
+
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
     }
-
 }

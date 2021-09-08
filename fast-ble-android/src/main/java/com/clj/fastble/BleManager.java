@@ -45,7 +45,7 @@ public class BleManager {
     private Application context;
     private BleScanRuleConfig bleScanRuleConfig;
     private BluetoothAdapter bluetoothAdapter;
-    private MultipleBluetoothController multipleBluetoothController;
+    public MultipleBluetoothController multipleBluetoothController;
     private BluetoothManager bluetoothManager;
 
     public static final int DEFAULT_SCAN_TIME = 10000;

@@ -1,31 +1,16 @@
 package com.carlgira.game;
 
-import org.robovm.apple.corebluetooth.CBAdvertisementData;
-import org.robovm.apple.corebluetooth.CBCentralManager;
-import org.robovm.apple.corebluetooth.CBCentralManagerDelegate;
-import org.robovm.apple.corebluetooth.CBCentralManagerRestoredState;
-import org.robovm.apple.corebluetooth.CBCentralManagerScanOptions;
-import org.robovm.apple.corebluetooth.CBCharacteristic;
-import org.robovm.apple.corebluetooth.CBConnectionEvent;
-import org.robovm.apple.corebluetooth.CBDescriptor;
-import org.robovm.apple.corebluetooth.CBL2CAPChannel;
-import org.robovm.apple.corebluetooth.CBManagerState;
-import org.robovm.apple.corebluetooth.CBPeripheral;
-import org.robovm.apple.corebluetooth.CBPeripheralDelegate;
-import org.robovm.apple.corebluetooth.CBService;
-import org.robovm.apple.corebluetooth.CBUUID;
-import org.robovm.apple.foundation.NSArray;
-import org.robovm.apple.foundation.NSAutoreleasePool;
-import org.robovm.apple.foundation.NSError;
-import org.robovm.apple.foundation.NSMutableArray;
-import org.robovm.apple.foundation.NSNumber;
+import org.robovm.apple.corebluetooth.*;
+import org.robovm.apple.foundation.*;
 import org.robovm.apple.uikit.UIApplication;
 import org.robovm.apple.foundation.Foundation;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;
 import com.badlogic.gdx.utils.Timer;
 import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.IBleDevice;
 import com.clj.fastble.exception.ConnectException;
@@ -38,7 +23,7 @@ import java.util.List;
 public class IOSLauncher extends IOSApplication.Delegate implements CBCentralManagerDelegate, CBPeripheralDelegate {
 
     CBCentralManager centralManager;
-    CBCharacteristic characteristic;
+    CBCharacteristic characteristicCadence;
     List<CBPeripheral> peripherals;
     NSArray<CBUUID> serviceUUIDs;
     private BleManager bleManager;
@@ -112,10 +97,12 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     }
 
     private BleGattCallback connectCallback;
+    String charUUid = "";
 
     public void connectToDevice (CBPeripheral peripheral, BleGattCallback callback) {
         connectCallback = callback;
         centralManager.connectPeripheral(peripheral, null);
+
     }
 
     int prevCumCrankRev = 0;
@@ -123,10 +110,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     int prevCrankStaleness = 0;
     double prevRPM = 0;
     double rpm = 0.0;
-
-    public double onCSC(CBCharacteristic characteristic){
-        return 0.0;
-    }
 
     @Override
     public void didUpdateState(CBCentralManager central) {
@@ -138,7 +121,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         } else {
             //If Bluetooth is off, display a UI alert message saying "Bluetooth is not enable" and "Make sure that your bluetooth is turned on"
             Foundation.log("Bluetooth Disabled- Make sure your Bluetooth is turned on");
-
         }
     }
 
@@ -166,7 +148,13 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
     @Override
     public void didConnectPeripheral(CBCentralManager central, CBPeripheral peripheral) {
-        blePeripheral = peripheral;
+        centralManager.stopScan();
+        peripheral.setDelegate(this);
+        //Only look for services that matches transmit uuid
+        NSArray<CBUUID> serviceUUIDs = new NSMutableArray<>();
+        serviceUUIDs.add(new CBUUID("00001816-0000-1000-8000-00805F9B34FB"));
+        peripheral.discoverServices(serviceUUIDs);
+
         connectCallback.onConnectSuccess(devices.get(peripheral.getName()), peripheral, 0);
     }
 
@@ -215,12 +203,14 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         Foundation.log("*******************************************************");
 
         if ((error) != null) {
-            Foundation.log("Error discovering services: " + error.getLocalizedDescription());
+            Gdx.app.log("BLEAPP", "Error discovering services: " + error.getLocalizedDescription());
         }
 
-        //FIX We need to discover the all characteristic
+        for(CBService service : peripheral.getServices()) {
+            peripheral.discoverCharacteristics(null, service);
 
-        //Foundation.log("Discovered Services: \(services)");
+        }
+        Gdx.app.log("BLEAPP", "Discovered Services: ");
     }
 
     @Override
@@ -230,12 +220,34 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
     @Override
     public void didDiscoverCharacteristics(CBPeripheral peripheral, CBService service, NSError error) {
+        if ((error) != null) {
+            Gdx.app.log("BLEAPP", "Error discovering services " + error.getLocalizedDescription());
+            return;
+        }
 
+        NSArray<CBCharacteristic> characteristics = service.getCharacteristics();
+
+        Gdx.app.log("BLEAPP", "Found " + characteristics.size() + " characteristics");
+
+        for(CBCharacteristic characteristic : characteristics) {
+            Gdx.app.log("BLEAPP", "Found " + characteristic.getUUID().getUUIDString());
+            if(characteristic.getUUID().equals(new CBUUID("00002a5b-0000-1000-8000-00805F9B34FB"))){
+                characteristicCadence = characteristic;
+                peripheral.setNotifyValue(true, characteristicCadence);
+
+                Gdx.app.log("BLEAPP", "Characteristic " + characteristicCadence.getUUID().getUUIDString());
+            }
+
+            //peripheral.discoverDescriptors(for: characteristic)
+        }
     }
 
     @Override
     public void didUpdateValue(CBPeripheral peripheral, CBCharacteristic characteristic, NSError error) {
-
+        Gdx.app.log("BLEIOS", "didUpdateValue " + notifyCallback);
+        if(notifyCallback != null){
+            notifyCallback.onCharacteristicChanged(characteristic.getValue().getBytes());
+        }
     }
 
     @Override
@@ -245,7 +257,7 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
     @Override
     public void didUpdateNotificationState(CBPeripheral peripheral, CBCharacteristic characteristic, NSError error) {
-        Foundation.log("Value Recieved2: " + characteristic.getValue());
+
     }
 
     @Override
@@ -271,5 +283,10 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     @Override
     public void didOpenL2CAPChannel(CBPeripheral peripheral, CBL2CAPChannel channel, NSError error) {
 
+    }
+
+    private BleNotifyCallback notifyCallback;
+    public void subscribeToCharacteristic(String servUuid, String charUuid, BleNotifyCallback callback) {
+        this.notifyCallback = callback;
     }
 }

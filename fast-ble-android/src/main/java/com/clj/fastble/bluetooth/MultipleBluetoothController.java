@@ -3,6 +3,7 @@ package com.clj.fastble.bluetooth;
 
 import android.bluetooth.BluetoothDevice;
 import android.os.Build;
+import android.util.Log;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.data.IBleDevice;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 public class MultipleBluetoothController {
 
-    private final BleLruHashMap<String, BleBluetooth> bleLruHashMap;
+    public final BleLruHashMap<String, BleBluetooth> bleLruHashMap;
     private final HashMap<String, BleBluetooth> bleTempHashMap;
 
     public MultipleBluetoothController() {
@@ -69,6 +70,11 @@ public class MultipleBluetoothController {
     }
 
     public synchronized BleBluetooth getBleBluetooth(IBleDevice bleDevice) {
+        Log.d("BLEAPP", "-" + bleDevice + "- " + bleDevice.getKey());
+        for(String keys : bleLruHashMap.keySet()){
+            Log.d("BLEAPP", "" + keys);
+        }
+
         if (bleDevice != null) {
             if (bleLruHashMap.containsKey(bleDevice.getKey())) {
                 return bleLruHashMap.get(bleDevice.getKey());

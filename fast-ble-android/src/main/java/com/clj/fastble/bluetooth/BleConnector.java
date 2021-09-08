@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleIndicateCallback;
@@ -217,9 +218,14 @@ public class BleConnector {
     }
 
     private BleConnector withUUID(UUID serviceUUID, UUID characteristicUUID) {
+
+        Log.d("BLEAPP", "mBluetoothGatt 1" + mBluetoothGatt);
         if (serviceUUID != null && mBluetoothGatt != null) {
             mGattService = mBluetoothGatt.getService(serviceUUID);
         }
+
+        Log.d("BLEAPP", "mGattService 1" + mGattService);
+
         if (mGattService != null && characteristicUUID != null) {
             mCharacteristic = mGattService.getCharacteristic(characteristicUUID);
         }
@@ -243,6 +249,8 @@ public class BleConnector {
      */
     public void enableCharacteristicNotify(BleNotifyCallback bleNotifyCallback, String uuid_notify,
                                            boolean userCharacteristicDescriptor) {
+
+        Log.d("BLEAPP", "CHAR PROPS "  + mCharacteristic.getProperties());
         if (mCharacteristic != null
                 && (mCharacteristic.getProperties() | BluetoothGattCharacteristic.PROPERTY_NOTIFY) > 0) {
 

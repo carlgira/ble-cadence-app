@@ -1,6 +1,7 @@
 package com.carlgira.game;
 
 import com.clj.fastble.callback.BleGattCallback;
+import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.IBleDevice;
 import com.clj.fastble.data.IBleManager;
@@ -26,6 +27,12 @@ public class BleManager implements IBleManager {
     public void disconnect(IBleDevice device, BleGattCallback callback) {
 
     }
+
+    @Override
+    public void subscribeToCharacteristic(IBleDevice device, String servUuid, String charUuid, BleNotifyCallback callback) {
+        this.launcher.subscribeToCharacteristic(servUuid, charUuid, callback);
+    }
+
 
     public void setIOSApp(IOSLauncher launcher){
         this.launcher = launcher;

@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleGattCallback;
@@ -176,6 +177,9 @@ public class BleBluetooth {
             bluetoothGatt = bleDevice.getDevice().connectGatt(BleManager.getInstance().getContext(),
                     autoConnect, coreGattCallback);
         }
+
+        Log.d("BLEAPP", "bluetoothGatt 12 " + bluetoothGatt);
+
         if (bluetoothGatt != null) {
             if (bleGattCallback != null) {
                 bleGattCallback.onStartConnect();
