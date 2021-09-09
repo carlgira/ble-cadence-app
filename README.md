@@ -47,6 +47,10 @@ adb -s <device-id> install -r <path-to-apk> # Install apk manually to device
 [Deploying your libGDX game to iOS in 2020](https://medium.com/@bschulte19e/deploying-your-libgdx-game-to-ios-in-2020-4ddce8fff26c)
 
 
+## Tests
+
+You need a device an emulator wont work. I tested the app on a Motorola Z Play (android) and on an Iphone XR (IOS) with a Magene cadence sensor.
+
 ## References
 
 - Android: https://github.com/Jasonchenlijian/FastBle.git I base the lib on this project.
