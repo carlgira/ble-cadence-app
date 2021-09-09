@@ -46,7 +46,6 @@ public class BleController extends IBleController {
 
     }
 
-
     public void setIOSApp(IOSLauncher launcher){
         this.launcher = launcher;
     }

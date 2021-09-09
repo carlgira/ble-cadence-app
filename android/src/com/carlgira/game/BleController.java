@@ -66,13 +66,7 @@ public class BleController extends IBleController {
     }
 
     public void init(Application application) {
-
         BleManager.getInstance().init(application);
-       /* BleManager.getInstance()
-                .enableLog(true)
-                .setReConnectCount(1, 5000)
-                .setConnectOverTime(20000)
-                .setOperateTimeout(5000);*/
     }
 
     public void setAndroidApp(AndroidLauncher launcher){

@@ -47,8 +47,5 @@ public class BleController extends IBleController {
 
     @Override
     public void stopNotify(IBleDevice device) {
-
     }
-
-
 }

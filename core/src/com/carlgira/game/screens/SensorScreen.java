@@ -155,8 +155,6 @@ public class SensorScreen extends BaseScreen {
 
                 }
             };
-
-
     }
 
     public void initialize() {
@@ -176,7 +174,6 @@ public class SensorScreen extends BaseScreen {
             this.clear();
             BLECadenceTest.setActiveScreen(mainScreen);
 
-
             return true;
         });
 
@@ -194,7 +191,6 @@ public class SensorScreen extends BaseScreen {
 
             listDevices.clear();
             checkBoxes.clear();
-
 
             bleManager.scan(new BleScanCallback() {
                 @Override
@@ -229,7 +225,6 @@ public class SensorScreen extends BaseScreen {
         table.setWidth((int)(BaseScreen.width*0.9));
         table.setHeight((int)(BaseScreen.height*0.6));
         table.setPosition((int)(BaseScreen.width*0.05), (int)(BaseScreen.height*0.15));
-        //table.padTop(50);
 
         stage.addActor(backButton);
         stage.addActor(scanButton);
@@ -276,13 +271,10 @@ public class SensorScreen extends BaseScreen {
 
     public double getCadenceValue(byte[] byteArray) {
 
-        int value_offset = 0;
-
         Gdx.app.log("BLEAPP", Arrays.toString(byteArray));
 
         int crankRevIndex = 1;
         int crankTimeIndex = 3;
-        //if(hasWheel){crankRevIndex = 7;crankTimeIndex = 9;}
 
         int[] data = new int[byteArray.length];
 
@@ -292,32 +284,27 @@ public class SensorScreen extends BaseScreen {
         int lastCrankTime = ((data[crankTimeIndex + 1] << 8) + data[crankTimeIndex]);
 
         int deltaRotations = cumulativeCrankRev - prevCumulativeCrankRev;
-        if (deltaRotations < 0)
-        {
+        if (deltaRotations < 0) {
             deltaRotations += 65535;
         }
 
         int timeDelta = lastCrankTime - prevCrankTime;
-        if (timeDelta < 0)
-        {
+        if (timeDelta < 0) {
             timeDelta += 65535;
         }
 
-        if (timeDelta != 0)
-        {
+        if (timeDelta != 0) {
             prevCrankStaleness = 0;
             double timeMins = ((double)timeDelta) / 1024.0 / 60.0;
             rpm = ((double)deltaRotations) / timeMins;
             prevRPM = rpm;
 
         }
-        else if (prevCrankStaleness < stalenessLimit)
-        {
+        else if (prevCrankStaleness < stalenessLimit) {
             rpm = prevRPM;
             prevCrankStaleness += 1;
         }
-        else
-        {
+        else {
             rpm = 0.0;
         }
 

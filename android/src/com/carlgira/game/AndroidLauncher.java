@@ -13,15 +13,13 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
 import android.widget.Toast;
-
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.clj.fastble.BleManager;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.scan.BleScanRuleConfig;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +27,12 @@ import java.util.UUID;
 public class AndroidLauncher extends AndroidApplication {
 
 	private BleController bleManager;
+
+	private static final int REQUEST_CODE_OPEN_GPS = 1;
+	private static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
+
+	private BleScanCallback scanCallback;
+	private String serviceUUID;
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
@@ -67,13 +71,6 @@ public class AndroidLauncher extends AndroidApplication {
 				break;
 		}
 	}
-
-	private static final int REQUEST_CODE_OPEN_GPS = 1;
-	private static final int REQUEST_CODE_PERMISSION_LOCATION = 2;
-
-	private BleScanCallback scanCallback;
-	private String serviceUUID;
-
 
 	public void checkPermissions(String uuid, BleScanCallback callback) {
 		this.scanCallback = callback;
@@ -155,11 +152,11 @@ public class AndroidLauncher extends AndroidApplication {
 				.setAutoConnect(isAutoConnect)
 				.setScanTimeOut(10000)
 				.build();
-		com.clj.fastble.BleManager.getInstance().initScanRule(scanRuleConfig);
+
+		BleManager.getInstance().initScanRule(scanRuleConfig);
 	}
 
 	private void startScan() {
 		com.clj.fastble.BleManager.getInstance().scan(scanCallback);
 	}
-
 }

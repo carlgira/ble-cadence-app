@@ -4,7 +4,6 @@ import org.robovm.apple.corebluetooth.*;
 import org.robovm.apple.foundation.*;
 import org.robovm.apple.uikit.UIApplication;
 import org.robovm.apple.foundation.Foundation;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplication;
 import com.badlogic.gdx.backends.iosrobovm.IOSApplicationConfiguration;
@@ -14,11 +13,9 @@ import com.clj.fastble.callback.BleNotifyCallback;
 import com.clj.fastble.callback.BleScanCallback;
 import com.clj.fastble.data.IBleDevice;
 import com.clj.fastble.exception.ConnectException;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 
 public class IOSLauncher extends IOSApplication.Delegate implements CBCentralManagerDelegate, CBPeripheralDelegate {
 
@@ -30,9 +27,11 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     private CBPeripheral blePeripheral;
     private HashMap<String, IBleDevice> devices = new HashMap<>();
 
+    private BleNotifyCallback notifyCallback;
+    private BleGattCallback connectCallback;
+
     @Override
     protected IOSApplication createApplication() {
-
         IOSApplicationConfiguration config = new IOSApplicationConfiguration();
 
         serviceUUIDs = new NSMutableArray<>();
@@ -87,7 +86,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
                 callback.onScanFinished(new ArrayList<>());
             }
         }, 10);
-
     }
 
     public void cancelScan(){
@@ -111,13 +109,10 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         }
     }
 
-    private BleGattCallback connectCallback;
-
     public void connectToDevice (CBPeripheral peripheral, BleGattCallback callback) {
         connectCallback = callback;
         centralManager.connectPeripheral(peripheral, null);
     }
-
 
     @Override
     public void didUpdateState(CBCentralManager central) {
@@ -143,12 +138,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         devices.put(device.getName(), device);
         peripheral.setDelegate(this);
         this.callback.onScanning(new BleDevice(peripheral));
-        if (blePeripheral != null) {
-            Foundation.log("Found new pheripheral devices with services");
-            Foundation.log("Peripheral name: " + peripheral.getName());
-            Foundation.log("**********************************");
-            Foundation.log("Advertisement Data : " + advertisementData.getLocalName());
-        }
     }
 
 
@@ -204,7 +193,6 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
     @Override
     public void didDiscoverServices(CBPeripheral peripheral, NSError error) {
-        Foundation.log("*******************************************************");
 
         if ((error) != null) {
             Gdx.app.log("BLEAPP", "Error discovering services: " + error.getLocalizedDescription());
@@ -281,7 +269,7 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
     }
 
-    private BleNotifyCallback notifyCallback;
+
     public void subscribeToCharacteristic(String servUuid, String charUuid, BleNotifyCallback callback) {
         this.notifyCallback = callback;
     }

@@ -17,7 +17,6 @@ public class MainScreen extends BaseScreen {
     private int cadence = 0;
     private SensorScreen sensorScreen;
 
-
     public void initialize() {
         super.initialize();
 
@@ -63,14 +62,12 @@ public class MainScreen extends BaseScreen {
 
     @Override
     public void update(float dt) {
-
     }
 
     public void setCadence(int cadence){
         this.cadence = cadence;
         this.cadenceLabel.setText("" + this.cadence);
     }
-
 
     @Override
     public boolean scrolled(float amountX, float amountY) {
