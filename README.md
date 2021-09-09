@@ -4,6 +4,8 @@ App with libgdx to test connectivity to Bluetooth low energy (BLE) devices. IOS 
 
 It's not the best code and the app needs some refactoring but I needed to know if it was possible to connect to android and ios to bluetooth using libgdx.
 
+It's configured specially for a cadence sensor, but it's not much work to add other sensors.
+
 |    |            | 
 |----------|:-------------:|
 | <img src="android/assets/cadence1.png" width="200" height="350"/>|  <img src="android/assets/cadence2.png" width="200" height="350"/> |
