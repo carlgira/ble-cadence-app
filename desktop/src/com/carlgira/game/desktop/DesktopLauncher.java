@@ -9,6 +9,6 @@ public class DesktopLauncher {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
 		config.width = 360;
 		config.height = 720;
-		new LwjglApplication(new BLECadenceTest(new BleManager()), config);
+		new LwjglApplication(new BLECadenceTest(new BleController()), config);
 	}
 }

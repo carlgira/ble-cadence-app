@@ -28,13 +28,13 @@ import java.util.UUID;
 
 public class AndroidLauncher extends AndroidApplication {
 
-	private BleManager bleManager;
+	private BleController bleManager;
 
 	@Override
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		bleManager = new BleManager();
+		bleManager = new BleController();
 		bleManager.init(getApplication());
 		bleManager.setAndroidApp(this);
 

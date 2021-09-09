@@ -15,4 +15,27 @@ public abstract class BleGattCallback<T> {
 
     public abstract void onDisConnected(boolean isActiveDisConnected, IBleDevice device, T gatt, int status);
 
+    public static class DummyBleGattCallback extends BleGattCallback{
+
+        @Override
+        public void onStartConnect() {
+
+        }
+
+        @Override
+        public void onConnectFail(IBleDevice bleDevice, BleException exception) {
+
+        }
+
+        @Override
+        public void onConnectSuccess(IBleDevice bleDevice, Object gatt, int status) {
+
+        }
+
+        @Override
+        public void onDisConnected(boolean isActiveDisConnected, IBleDevice device, Object gatt, int status) {
+
+        }
+    }
+
 }

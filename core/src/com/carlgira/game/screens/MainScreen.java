@@ -1,33 +1,25 @@
 package com.carlgira.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
-import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.Timer;
 import com.carlgira.game.BLECadenceTest;
 import com.carlgira.game.base.BaseScreen;
-import com.clj.fastble.data.IBleManager;
+import com.clj.fastble.data.IBleController;
 
 public class MainScreen extends BaseScreen {
 
-    private IBleManager bleManager;
     private Table table;
     private Label cadenceLabel;
     private int cadence = 0;
+    private SensorScreen sensorScreen;
 
-    public MainScreen(IBleManager bleManager){
-        this.bleManager = bleManager;
-    }
 
     public void initialize() {
         super.initialize();
-        Gdx.app.log("BLEAPP", "init MainScreen");
 
         TextButton configButton = new TextButton( "CONFIG", skin);
 
@@ -38,7 +30,8 @@ public class MainScreen extends BaseScreen {
                 if (!((InputEvent) e).getType().equals(Type.touchDown))
                     return false;
 
-                BLECadenceTest.setActiveScreen( new SensorScreen(MainScreen.this, bleManager));
+
+                BLECadenceTest.setActiveScreen( sensorScreen);
                 return true;
             }
         );
@@ -82,5 +75,9 @@ public class MainScreen extends BaseScreen {
     @Override
     public boolean scrolled(float amountX, float amountY) {
         return false;
+    }
+
+    public void setSensorScreen(SensorScreen sensorScreen) {
+        this.sensorScreen = sensorScreen;
     }
 }

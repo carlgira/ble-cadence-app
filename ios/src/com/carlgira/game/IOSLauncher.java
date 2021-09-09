@@ -22,14 +22,13 @@ import java.util.List;
 
 public class IOSLauncher extends IOSApplication.Delegate implements CBCentralManagerDelegate, CBPeripheralDelegate {
 
-    CBCentralManager centralManager;
-    CBCharacteristic characteristicCadence;
-    List<CBPeripheral> peripherals;
-    NSArray<CBUUID> serviceUUIDs;
-    private BleManager bleManager;
-    CBPeripheral blePeripheral;
-
-    HashMap<String, IBleDevice> devices = new HashMap<>();
+    private CBCentralManager centralManager;
+    private CBCharacteristic characteristicCadence;
+    private List<CBPeripheral> peripherals;
+    private NSArray<CBUUID> serviceUUIDs;
+    private BleController bleManager;
+    private CBPeripheral blePeripheral;
+    private HashMap<String, IBleDevice> devices = new HashMap<>();
 
     @Override
     protected IOSApplication createApplication() {
@@ -38,7 +37,7 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
 
         serviceUUIDs = new NSMutableArray<>();
         centralManager = new CBCentralManager(this, null);
-        bleManager = new BleManager();
+        bleManager = new BleController();
         bleManager.setIOSApp(this);
         config.orientationPortrait = true;
 
@@ -48,8 +47,14 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     @Override
     public void willTerminate(UIApplication application) {
         super.willTerminate(application);
-        Foundation.log("Stop Scanning");
         centralManager.stopScan();
+        if(blePeripheral != null){
+            centralManager.cancelPeripheralConnection(blePeripheral);
+        }
+        blePeripheral = null;
+        characteristicCadence = null;
+        peripherals.clear();
+        devices.clear();
     }
 
     public static void main(String[] argv) {
@@ -79,8 +84,9 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
             @Override
             public void run() {
                 cancelScan();
+                callback.onScanFinished(new ArrayList<>());
             }
-        }, 17);
+        }, 10);
 
     }
 
@@ -90,6 +96,15 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
         Foundation.log("Number of Peripherals Found: (peripherals.count) " + this.peripherals.size());
     }
 
+    public boolean isConnected(IBleDevice device) {
+        for(CBPeripheral peripheral : centralManager.retrieveConnectedPeripherals(serviceUUIDs)){
+            if(peripheral.getName().equals(device.getName())){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void disconnectFromDevice(){
         if(blePeripheral != null){
             centralManager.cancelPeripheralConnection(blePeripheral);
@@ -97,29 +112,20 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     }
 
     private BleGattCallback connectCallback;
-    String charUUid = "";
 
     public void connectToDevice (CBPeripheral peripheral, BleGattCallback callback) {
         connectCallback = callback;
         centralManager.connectPeripheral(peripheral, null);
-
     }
 
-    int prevCumCrankRev = 0;
-    int prevCrankTime = 0;
-    int prevCrankStaleness = 0;
-    double prevRPM = 0;
-    double rpm = 0.0;
 
     @Override
     public void didUpdateState(CBCentralManager central) {
         if (CBManagerState.PoweredOn.compareTo(central.getState()) == 0) {
 
             Foundation.log("Bluetooth Enabled");
-            //starScan();
 
         } else {
-            //If Bluetooth is off, display a UI alert message saying "Bluetooth is not enable" and "Make sure that your bluetooth is turned on"
             Foundation.log("Bluetooth Disabled- Make sure your Bluetooth is turned on");
         }
     }
@@ -150,9 +156,7 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     public void didConnectPeripheral(CBCentralManager central, CBPeripheral peripheral) {
         centralManager.stopScan();
         peripheral.setDelegate(this);
-        //Only look for services that matches transmit uuid
-        NSArray<CBUUID> serviceUUIDs = new NSMutableArray<>();
-        serviceUUIDs.add(new CBUUID("00001816-0000-1000-8000-00805F9B34FB"));
+        serviceUUIDs.add(new CBUUID(this.bleManager.getServiceUUID()));
         peripheral.discoverServices(serviceUUIDs);
 
         connectCallback.onConnectSuccess(devices.get(peripheral.getName()), peripheral, 0);
@@ -221,30 +225,22 @@ public class IOSLauncher extends IOSApplication.Delegate implements CBCentralMan
     @Override
     public void didDiscoverCharacteristics(CBPeripheral peripheral, CBService service, NSError error) {
         if ((error) != null) {
-            Gdx.app.log("BLEAPP", "Error discovering services " + error.getLocalizedDescription());
             return;
         }
-
         NSArray<CBCharacteristic> characteristics = service.getCharacteristics();
 
-        Gdx.app.log("BLEAPP", "Found " + characteristics.size() + " characteristics");
-
         for(CBCharacteristic characteristic : characteristics) {
-            Gdx.app.log("BLEAPP", "Found " + characteristic.getUUID().getUUIDString());
-            if(characteristic.getUUID().equals(new CBUUID("00002a5b-0000-1000-8000-00805F9B34FB"))){
+            if(characteristic.getUUID().equals(new CBUUID(this.bleManager.getCharacteristicUUID()))){
                 characteristicCadence = characteristic;
                 peripheral.setNotifyValue(true, characteristicCadence);
-
-                Gdx.app.log("BLEAPP", "Characteristic " + characteristicCadence.getUUID().getUUIDString());
+                notifyCallback.onNotifySuccess();
+                break;
             }
-
-            //peripheral.discoverDescriptors(for: characteristic)
         }
     }
 
     @Override
     public void didUpdateValue(CBPeripheral peripheral, CBCharacteristic characteristic, NSError error) {
-        Gdx.app.log("BLEIOS", "didUpdateValue " + notifyCallback);
         if(notifyCallback != null){
             notifyCallback.onCharacteristicChanged(characteristic.getValue().getBytes());
         }
